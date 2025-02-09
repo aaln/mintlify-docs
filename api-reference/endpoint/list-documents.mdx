@@ -1,0 +1,38 @@
+---
+title: 'List Documents'
+openapi: 'GET /api/documents'
+---
+
+<Note>
+  Results are paginated. Use `limit` and `offset` parameters to navigate through results.
+</Note>
+
+## Usage
+
+Get a list of all documents with optional filtering by status. The response includes pagination information to help you navigate through large result sets.
+
+```bash
+curl -X GET "https://api.slct.ai/api/documents?limit=10&status=completed" \
+  -H "Authorization: Bearer your-api-key"
+```
+
+## Filtering
+
+You can filter documents by their processing status:
+
+- `created` - Document registered but not yet uploaded
+- `uploading` - File upload in progress
+- `processing` - Document being processed
+- `completed` - Processing finished successfully
+- `failed` - Processing encountered an error
+
+```typescript
+// Using the Node.js client
+const client = new SlctClient('your-api-key');
+
+const { documents, pagination } = await client.listDocuments({
+  status: 'completed',
+  limit: 10,
+  offset: 0
+});
+```

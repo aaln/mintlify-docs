@@ -1,33 +1,182 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'Welcome to the SLCT.AI document processing API'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Welcome to SLCT.AI
 
-## Welcome
-
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+SLCT.AI helps you process documents and extract structured data with speed, reliability, and security. Our API is designed to be developer-friendly while maintaining enterprise-grade features.
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="SLCT.AI API Specification"
+  icon="file-lines"
+  href="https://github.com/slct/api-docs/blob/main/openapi.json"
 >
-  View the OpenAPI specification file
+  View our complete OpenAPI specification
 </Card>
+
+## Core Features
+
+<CardGroup cols={2}>
+  <Card title="Simple Integration" icon="plug">
+    Quick to implement with comprehensive client libraries
+  </Card>
+  <Card title="Secure Processing" icon="shield-check">
+    Enterprise-grade security with SOC 2 compliance
+  </Card>
+  <Card title="Smart Extraction" icon="brain">
+    Advanced AI-powered document understanding
+  </Card>
+  <Card title="Real-time Updates" icon="bolt">
+    Track processing status with webhooks
+  </Card>
+</CardGroup>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints are authenticated using Bearer tokens. You can obtain your API key from the [SLCT.AI Dashboard](https://dashboard.slct.ai).
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+```bash
+curl -X GET "https://api.slct.ai/api/documents" \
+  -H "Authorization: Bearer your-api-key"
 ```
+
+<Note>
+  Keep your API key secure and never expose it in client-side code.
+</Note>
+
+## Quick Start
+
+Here's a simple example to get you started:
+
+```typescript
+import SlctClient from '@slct/api-client';
+
+// Initialize the client
+const client = new SlctClient('your-api-key');
+
+// Upload a document
+const documentId = await client.uploadFile(file);
+
+// Wait for processing
+const result = await client.waitForProcessing(documentId);
+```
+
+## API Structure
+
+Our API is organized around three main concepts:
+
+<CodeGroup>
+  ```bash Documents
+  GET /api/documents         # List all documents
+  POST /api/documents/new    # Create new document
+  GET /api/documents/:id     # Get single document
+  ```
+
+  ```bash Processing
+  Status: processing -> completed
+  Results include:
+  - Extracted text
+  - Structured data
+  - Confidence scores
+  ```
+
+  ```bash Webhooks
+  Events:
+  - document.created
+  - document.processing
+  - document.completed
+  - document.failed
+  ```
+</CodeGroup>
+
+## Client Libraries
+
+We provide official client libraries in multiple languages:
+
+<CardGroup cols={3}>
+  <Card
+    title="Node.js"
+    icon="js"
+    href="https://github.com/slct/node-client"
+  >
+    JavaScript/TypeScript
+  </Card>
+  <Card
+    title="Python"
+    icon="python"
+    href="https://github.com/slct/python-client"
+  >
+    Python 3.7+
+  </Card>
+  <Card
+    title="Java"
+    icon="java"
+    href="https://github.com/slct/java-client"
+  >
+    Java 8+
+  </Card>
+</CardGroup>
+
+## Documentation Structure
+
+Our documentation is organized into the following sections:
+
+<Steps>
+  <Step title="Getting Started">
+    Quick start guide and basic concepts
+  </Step>
+  <Step title="Core Concepts">
+    Detailed explanation of key features
+  </Step>
+  <Step title="API Reference">
+    Complete API documentation
+  </Step>
+  <Step title="Guides">
+    Step-by-step tutorials
+  </Step>
+</Steps>
+
+## API Versioning
+
+We use date-based versioning for our API. The current version is `2024-02-05`.
+
+<Note>
+  Set your preferred API version using the `SLCT-API-Version` header.
+  If not specified, we'll use the latest version.
+</Note>
+
+## Support
+
+Need help? We're here for you!
+
+<CardGroup cols={2}>
+  <Card
+    title="Join our Discord"
+    icon="discord"
+    href="https://discord.gg/slct"
+  >
+    Get help from our community
+  </Card>
+  <Card
+    title="GitHub Issues"
+    icon="github"
+    href="https://github.com/slct/api-client/issues"
+  >
+    Report bugs and request features
+  </Card>
+</CardGroup>
+
+## Rate Limits
+
+Our API implements rate limiting based on your plan:
+
+| Plan | Rate Limit | Burst |
+|------|------------|-------|
+| Free | 100/min | 150/min |
+| Pro | 500/min | 750/min |
+| Enterprise | Custom | Custom |
+
+<Note>
+  Need higher limits? [Contact our sales team](mailto:sales@slct.ai)
+</Note>

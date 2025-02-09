@@ -1,0 +1,60 @@
+---
+title: 'Create Document'
+openapi: 'POST /api/documents/new'
+---
+
+<Note>
+  For files larger than 5MB, you'll need to perform a multipart upload using the returned signed URLs.
+</Note>
+
+## Usage
+
+Create a new document and get upload details. For large files, the response includes signed URLs for multipart upload.
+
+```bash
+curl -X POST "https://api.slct.ai/api/documents/new" \
+  -H "Authorization: Bearer your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_size": 1048576,
+    "parts": 1,
+    "metadata": {
+      "customerRef": "12345"
+    }
+  }'
+```
+
+## File Upload Process
+
+1. Create document and get upload details
+2. Use signed URLs to upload file parts
+3. Document processing begins automatically
+4. Monitor status through the GET endpoint
+
+```typescript
+// Using the Node.js client
+const client = new SlctClient('your-api-key');
+
+const documentId = await client.uploadFile(
+  file,
+  { customerRef: '12345' },
+  (progress) => {
+    console.log(`${progress.loaded}/${progress.total} bytes`);
+  }
+);
+```
+
+## Metadata
+
+You can attach custom metadata to your documents:
+
+```json
+{
+  "metadata": {
+    "customerRef": "12345",
+    "department": "finance",
+    "priority": "high",
+    "tags": ["invoice", "urgent"]
+  }
+}
+```

@@ -1,0 +1,65 @@
+---
+title: 'Get Document'
+openapi: 'GET /api/documents/{id}'
+---
+
+<Note>
+  Processing results are only included in the response when status is 'completed'.
+</Note>
+
+## Usage
+
+Retrieve a specific document by ID. This endpoint returns the document's current status, metadata, and processing results if available.
+
+```bash
+curl -X GET "https://api.slct.ai/api/documents/doc_123abc" \
+  -H "Authorization: Bearer your-api-key"
+```
+
+## Processing Results
+
+When processing is complete, the response includes extracted data:
+
+```json
+{
+  "id": "doc_123abc",
+  "status": "completed",
+  "results": {
+    "text": "Extracted document text...",
+    "fields": {
+      "invoice_number": "INV-001",
+      "date": "2024-02-05",
+      "amount": 1250.00
+    }
+  }
+}
+```
+
+```typescript
+// Using the Node.js client
+const client = new SlctClient('your-api-key');
+
+// Get document with automatic polling
+const document = await client.waitForProcessing('doc_123abc');
+
+// Or get current status
+const status = await client.getDocument('doc_123abc');
+```
+
+## Error States
+
+If processing fails, the response includes error details:
+
+```json
+{
+  "id": "doc_123abc",
+  "status": "failed",
+  "error": {
+    "code": "PROCESSING_ERROR",
+    "message": "Failed to process document",
+    "details": {
+      "reason": "Unsupported file format"
+    }
+  }
+}
+```

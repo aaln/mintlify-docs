@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "SLCT.AI Document Processing API",
+    "description": "API for processing and extracting data from documents with speed and reliability",
     "license": {
       "name": "MIT"
     },
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.slct.ai"
     }
   ],
   "security": [
@@ -19,29 +19,58 @@
     }
   ],
   "paths": {
-    "/plants": {
+    "/api/documents": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "description": "Returns all documents that the user has access to",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results to return",
+            "description": "The maximum number of documents to return",
             "schema": {
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "default": 50,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of documents to skip for pagination",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter documents by status",
+            "schema": {
+              "type": "string",
+              "enum": ["created", "uploading", "processing", "completed", "failed"]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "List of documents",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "type": "object",
+                  "properties": {
+                    "documents": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Document"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
                   }
                 }
               }
@@ -58,15 +87,17 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/documents/new": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "Creates a new document for processing",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "description": "Document creation details",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/NewDocument"
               }
             }
           },
@@ -74,17 +105,25 @@
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Document created successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "type": "object",
+                  "properties": {
+                    "document_id": {
+                      "type": "string"
+                    },
+                    "upload_details": {
+                      "$ref": "#/components/schemas/UploadDetails"
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "unexpected error",
+            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,28 +135,33 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/api/documents/{id}": {
+      "get": {
+        "description": "Returns a single document by ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "ID of plant to delete",
+            "description": "ID of document to fetch",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
+          "200": {
+            "description": "Document details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
           },
-          "400": {
-            "description": "unexpected error",
+          "404": {
+            "description": "Document not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -132,55 +176,137 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "Document": {
         "type": "object",
+        "required": ["id", "status"],
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the document"
           },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+          "status": {
+            "type": "string",
+            "enum": ["created", "uploading", "processing", "completed", "failed"],
+            "description": "Current status of the document"
           },
-          {
-            "required": [
-              "id"
-            ],
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of document creation"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of last update"
+          },
+          "metadata": {
             "type": "object",
+            "description": "Custom metadata attached to the document"
+          },
+          "results": {
+            "type": "object",
+            "description": "Processing results (only present if status is completed)",
             "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+              "text": {
+                "type": "string",
+                "description": "Extracted document text"
+              },
+              "fields": {
+                "type": "object",
+                "description": "Extracted structured data"
               }
             }
           }
-        ]
+        }
       },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
+      "NewDocument": {
+        "type": "object",
+        "required": ["file_size"],
+        "properties": {
+          "file_size": {
+            "type": "integer",
+            "description": "Size of the file in bytes"
+          },
+          "parts": {
+            "type": "integer",
+            "description": "Number of parts for multipart upload"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Custom metadata to attach to the document"
+          }
+        }
+      },
+      "UploadDetails": {
+        "type": "object",
+        "required": ["upload_id", "bucket", "key", "urls"],
+        "properties": {
+          "upload_id": {
+            "type": "string",
+            "description": "Unique identifier for the multipart upload"
+          },
+          "bucket": {
+            "type": "string",
+            "description": "S3 bucket name"
+          },
+          "key": {
+            "type": "string",
+            "description": "S3 object key"
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "part_number": {
+                  "type": "integer",
+                  "description": "Part number for multipart upload"
+                },
+                "signed_url": {
+                  "type": "string",
+                  "description": "Pre-signed URL for uploading this part"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Pagination": {
         "type": "object",
         "properties": {
-          "error": {
+          "total": {
             "type": "integer",
-            "format": "int32"
+            "description": "Total number of documents"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Current page size"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Current offset"
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "Whether there are more documents"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code"
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "object",
+            "description": "Additional error context"
           }
         }
       }
